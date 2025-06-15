@@ -1,0 +1,231 @@
+j'ai un petit probléme, dans ce css mobile menu est dans sidebar lorsque on hidde sidebar on version mobile , mobile menu est hidde aussi : /* Hamburger Icon */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1002;
+}
+
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: #fff; /* White to match sidebar theme */
+  margin: 5px 0;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile Menu Panel */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  max-width: 300px;
+  height: 100%;
+  background: #222; /* Match sidebar background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1002;
+  transition: right 0.3s ease-in-out;
+  padding: 20px;
+  direction: rtl;
+  overflow-y: auto;
+  font-family: "cairo", sans-serif;
+}
+
+.mobile-menu.open {
+  right: 0;
+}
+
+.close-menu {
+  background: none;
+  border: none;
+  font-size: 25px;
+  cursor: pointer;
+  color: #fff;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  transition: color 0.3s ease;
+}
+
+.close-menu:hover {
+  color: #FFD700; /* Gold hover effect */
+}
+
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 20px;
+  text-align: center;
+  justify-content: center;
+}
+
+.mobile-nav-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-nav-links li {
+  color: #fff;
+  background: #333; /* Slightly lighter than sidebar bg */
+  padding: 10px;
+  border-radius: 4px;
+  text-align: right;
+  font-size: 1rem;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.mobile-nav-links li.active {
+  background: #FFD700;
+  color: #222;
+}
+
+.mobile-nav-links li:hover {
+  background: #FFD700;
+  color: #222;
+}
+
+.mobile-nav-links li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+}
+
+.mobile-nav-links li i {
+  font-size: 1.2rem;
+}
+
+/* Hide Desktop Sidebar and Show Mobile Menu on Mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  /* Adjust main content to avoid overlap */
+  .main-content {
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+} voici le html : <!-- Barre latérale -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="app-icon">
+            <img src="../../assets/Folia-white.png" alt="شعار فوليا" style="width: 24px; height: 24px;">
+        </div>
+        <!-- Hamburger Icon for Mobile -->
+        <button class="hamburger" aria-label="Toggle mobile menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+    <ul class="sidebar-list">
+        <li class="sidebar-list-item active" data-view="products">
+            <a href="#" onclick="event.preventDefault();">
+                <i class="fas fa-cube"></i>
+                <span>المنتجات</span>
+            </a>
+        </li>
+        <li class="sidebar-list-item" data-view="orders">
+            <a href="#" onclick="event.preventDefault();">
+                <i class="fas fa-box"></i>
+                <span>إدارة الطلبات</span>
+            </a>
+        </li>
+    </ul>
+       <!-- Mobile Menu Panel -->
+   <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" aria-label="Close mobile menu">×</button>
+        <div class="mobile-brand">
+            <img src="../../assets/Folia-white.png" alt="شعار فوليا" style="width: 24px; height: 24px;">
+            <span>فوليا</span>
+        </div>
+        <ul class="mobile-nav-links">
+            <!-- Sidebar items will be injected dynamically via JS -->
+        </ul>
+    </div>
+ 
+</div> voici le script: 
+// Mobile Menu Functionality
+document.addEventListener('DOMContentLoaded', function () {
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeMenu = document.querySelector('.close-menu');
+    const mobileNavLinks = document.querySelector('.mobile-nav-links');
+  
+    // Copy sidebar items to mobile menu
+    const sidebarItems = document.querySelectorAll('.sidebar-list-item');
+    sidebarItems.forEach(item => {
+      const mobileItem = document.createElement('li');
+      mobileItem.setAttribute('data-view', item.getAttribute('data-view'));
+      if (item.classList.contains('active')) {
+        mobileItem.classList.add('active');
+      }
+      const link = document.createElement('a');
+      link.href = '#';
+      link.innerHTML = item.querySelector('a').innerHTML; // Copy icon and text
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        // Trigger the same view change logic as the sidebar
+        const view = mobileItem.getAttribute('data-view');
+        document.querySelectorAll('.sidebar-list-item, .mobile-nav-links li').forEach(el => el.classList.remove('active'));
+        mobileItem.classList.add('active');
+        document.querySelector(`.sidebar-list-item[data-view="${view}"]`).classList.add('active');
+        // Assuming existing code dispatches a custom event or function for view change
+        const event = new CustomEvent('changeView', { detail: { view } });
+        document.dispatchEvent(event);
+        // Close mobile menu
+        mobileMenu.classList.remove('open');
+        hamburger.classList.remove('active');
+      });
+      mobileItem.appendChild(link);
+      mobileNavLinks.appendChild(mobileItem);
+    });
+  
+    // Open mobile menu
+    hamburger.addEventListener('click', function () {
+      mobileMenu.classList.add('open');
+      hamburger.classList.add('active');
+    });
+  
+    // Close mobile menu
+    closeMenu.addEventListener('click', function () {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('active');
+    });
+  
+    // Close mobile menu when clicking outside
+    window.addEventListener('click', function (event) {
+      if (!mobileMenu.contains(event.target) && !hamburger.contains(event.target)) {
+        mobileMenu.classList.remove('open');
+        hamburger.classList.remove('active');
+      }
+    });
+  });
